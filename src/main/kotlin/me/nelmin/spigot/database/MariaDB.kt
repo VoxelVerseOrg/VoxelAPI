@@ -1,12 +1,19 @@
 package me.nelmin.spigot.database
 
-import me.nelmin.spigot.VVE
+import me.nelmin.spigot.VoxelAPI
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
 
-class MariaDB(private val plugin: VVE) {
+class MariaDB(
+    private val address: String,
+    private val port: Int,
+    private val username: String,
+    private val password: String,
+    private val databaseName: String,
+) {
 
+    private val plugin = VoxelAPI.plugin
     private var connection: Connection? = null
 
     @Throws(SQLException::class)
@@ -14,13 +21,7 @@ class MariaDB(private val plugin: VVE) {
         if (connection != null)
             return this.connection!!
 
-        val address: String = plugin.config.get("mariadb.address")!!
-        val port: Int = plugin.config.get("mariadb.port")!!
-        val username: String = plugin.config.get("mariadb.username")!!
-        val password: String = plugin.config.get("mariadb.password")!!
-        val database: String = plugin.config.get("mariadb.database")!!
-
-        val url = "jdbc:mysql://$address:$port/$database"
+        val url = "jdbc:mysql://$address:$port/$databaseName"
 
         this.connection = DriverManager.getConnection(url, username, password)
         return this.connection!!
@@ -35,7 +36,7 @@ class MariaDB(private val plugin: VVE) {
         plugin.logger.info("Initializing database...")
         getConnection().createStatement().apply {
             addBatch(
-                "CREATE TABLE IF NOT EXISTS player_data (uuid varchar(36) primary key, name varchar(16), rank varchar(36), clan varchar(10), balance double, deaths int, kills int)"
+                "CREATE TABLE IF NOT EXISTS player_data (uuid varchar(36) primary key, name varchar(16), rank varchar(36), clan varchar(10), balance double, deaths int, kills int, chat_enabled boolean, msg_enabled boolean)"
             )
 
             addBatch(

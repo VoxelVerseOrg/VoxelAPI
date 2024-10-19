@@ -1,7 +1,6 @@
 package me.nelmin.spigot.database.models
 
-import me.nelmin.spigot.VVE
-import java.sql.PreparedStatement
+import me.nelmin.spigot.VoxelAPI
 import java.util.*
 
 class PlayerData(
@@ -11,10 +10,10 @@ class PlayerData(
     var clan: String,
     var balance: Double,
     var deaths: Int,
-    var kills: Int
+    var kills: Int,
+    var chatEnabled: Boolean,
+    var msgEnabled: Boolean,
 ) {
-    private val plugin = VVE.instance
-
     fun addMoney(amount: Double): PlayerData = setBalance(balance + amount)
     fun removeMoney(amount: Double): PlayerData = setBalance(balance - amount)
     fun setBalance(amount: Double): PlayerData {
@@ -43,15 +42,17 @@ class PlayerData(
     }
 
     fun updateData() {
-        plugin.mariadb.getConnection()
-            .prepareStatement("UPDATE player_data SET rank = ?, clan = ?, balance = ?, deaths = ?, kills = ? WHERE uuid = ?")
+        VoxelAPI.mariadb.getConnection()
+            .prepareStatement("UPDATE player_data SET rank = ?, clan = ?, balance = ?, deaths = ?, kills = ?, chat_enabled = ?, msg_enabled = ? WHERE uuid = ?")
             .apply {
                 setString(1, rank)
                 setString(2, clan)
                 setDouble(3, balance)
                 setInt(4, kills)
                 setInt(5, deaths)
-                setString(6, uuid.toString())
+                setBoolean(6, chatEnabled)
+                setBoolean(7, msgEnabled)
+                setString(8, uuid.toString())
                 executeUpdate()
             }
     }

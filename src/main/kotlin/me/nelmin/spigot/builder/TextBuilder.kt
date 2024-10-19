@@ -1,42 +1,49 @@
-package me.nelmin.spigot.other
+package me.nelmin.spigot.builder
 
-import me.nelmin.spigot.VVE
+import me.clip.placeholderapi.PlaceholderAPI
+import me.nelmin.spigot.VoxelAPI
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 
-class TextBuilder(private val text: String, private val isPath: Boolean = false) {
-    private val plugin = VVE.instance
-    private var updatedText = if (isPath) plugin.messages.get(text) ?: text else text
+class TextBuilder(private var text: String, private val isPath: Boolean = false) {
+
+    init {
+        text = if (isPath) VoxelAPI.messagesConfig.get(text) ?: text else text
+    }
 
     fun append(string: String, before: Boolean): TextBuilder {
         if (!isPath) {
-            updatedText = if (before) string + updatedText else updatedText + string
+            text = if (before) string + text else text + string
         }
         return this
     }
 
-    fun prefix(): TextBuilder {
-        val prefix = plugin.config.get("prefix") ?: "&e&lEconomy&r &8&l»&r"
-        updatedText = "$prefix $updatedText"
+    fun prefix(prefix: String): TextBuilder {
+        text = "$prefix $text"
         return this
     }
 
     fun replace(oldValue: Any, newValue: Any): TextBuilder {
-        if (!isPath) updatedText = updatedText.replace(oldValue.toString(), newValue.toString())
+        if (!isPath) text = text.replace(oldValue.toString(), newValue.toString())
         return this
     }
 
     fun replaceAll(map: Map<Any, Any>): TextBuilder {
         if (!isPath) {
             map.forEach { (oldValue, newValue) ->
-                updatedText = updatedText.replace(oldValue.toString(), newValue.toString())
+                text = text.replace(oldValue.toString(), newValue.toString())
             }
         }
         return this
     }
 
+    fun placeholderApi(player: Player): TextBuilder {
+        PlaceholderAPI.setPlaceholders(player, text)
+        return this
+    }
+
     fun sendToConsole(): TextBuilder {
-        plugin.server.consoleSender.sendMessage(getColorized())
+        VoxelAPI.plugin.server.consoleSender.sendMessage(getColorized())
         return this
     }
 
@@ -51,15 +58,15 @@ class TextBuilder(private val text: String, private val isPath: Boolean = false)
     }
 
     fun broadcast(): TextBuilder {
-        plugin.server.broadcastMessage(getColorized())
+        VoxelAPI.plugin.server.broadcastMessage(getColorized())
         return this
     }
 
     fun getColorized(): String {
-        return ChatColor.translateAlternateColorCodes('&', updatedText)
+        return ChatColor.translateAlternateColorCodes('&', text)
     }
 
     fun get(): String {
-        return updatedText
+        return text
     }
 }
