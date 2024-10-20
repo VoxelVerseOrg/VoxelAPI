@@ -19,9 +19,17 @@ Replace <VERSION> with the latest version.
 ### How to use?
 
 ```kotlin
+val loadedUserData: MutableSet<PlayerData> = mutableSetOf()
+
+val messagesConfig: ConfigInterface = ...
+
+val voxelAPI = VoxelAPI
+
 fun onEnable() {
-    VoxelAPI.plugin = this // this: the plugin
-    VoxelAPI.mariadb = MariaDB()
+    voxelAPI.plugin = this // this: the plugin
+    voxelAPI.mariadb = MariaDB(hostAdress, port, username, password, databaseName)
+    voxelAPI.loadedUserData = loadedUserData
+    voxelAPI.messagesConfig = messagesConfig
 }
 ```
 
